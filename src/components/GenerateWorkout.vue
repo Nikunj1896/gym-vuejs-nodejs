@@ -10,10 +10,10 @@
     <div class="row grid-container">
       <div
         class="col-sm-6 grid-item"
-        v-for="list in trainList"
-        :key="list.title"
+        v-for="(list,index) in trainList"
+        :key="list.title"  
       >
-        <div @click="getInputList(list)">
+        <div @click="getInputList(list,index)"  :class="{ active: isActive(index) }">
           {{ list.title }} <span>{{ list.week }}</span>
         </div>
       </div>
@@ -23,22 +23,10 @@
         >We are recommended 3+ workout for beginners.</span
       >
     </div>
-    <div>
-      <p class="back">Help</p>
-    </div>
-    <div>
-      <button
-        @click="generateWork()"
-        type="button"
-        class="btn btn-primary generate-btn"
-      >
-        Generate workout
-      </button>
-    </div>
   </div>
 
   <!-- create work out -->
-  <div class="p-3" v-if="createRef">
+  <div class="p-3">
     <div>
       <h1>Create work schedule</h1>
     </div>
@@ -88,24 +76,20 @@
             v-model="moreList.numberOfDays"
           />
         </div>
-        <div class="create-btn">
-          <button
-            type="button"
-            class="btn btn-danger"
-            @click="createRef = false"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            @click="moreRecommend()"
-          >
-            Submit
-          </button>
-        </div>
       </form>
     </div>
+  </div>
+  <div>
+    <p class="back">Help</p>
+  </div>
+  <div>
+    <button
+      @click="generateWork()"
+      type="button"
+      class="btn btn-primary generate-btn"
+    >
+      Generate workout
+    </button>
   </div>
 </template>
 
@@ -115,13 +99,14 @@ export default {
   data() {
     return {
       createRef: false,
+        activeIndex: null,
       trainList: [
-        { title: "1x", week: "Per Week" },
-        { title: "2x", week: "Per Week" },
-        { title: "3x", week: "Per Week" },
-        { title: "4x", week: "Per Week" },
-        { title: "5x", week: "Per Week" },
-        { title: "6x", week: "Per Week" },
+        { index:1,title: "1x", week: "Per Week" },
+        { index:2,title: "2x", week: "Per Week" },
+        { index:3,title: "3x", week: "Per Week" },
+        { index:4,title: "4x", week: "Per Week" },
+        { index:5,title: "5x", week: "Per Week" },
+        { index:6,title: "6x", week: "Per Week" },
       ],
       oftenTrain: "",
       moreList: {
@@ -133,9 +118,11 @@ export default {
     };
   },
   methods: {
-    getInputList(items) {
-      console.log("items", items.title);
-      this.oftenTrain = items.title;
+    getInputList(item,index) {
+      console.log("items", item.title);
+      this.oftenTrain = item.title;
+
+      this.activeIndex = index;
     },
     moreRecommend() {
       this.moreList = {
@@ -144,7 +131,7 @@ export default {
         weight: this.moreList.weight,
         numberOfDays: this.moreList.numberOfDays,
       };
-      this.createRef = false
+      this.createRef = false;
       console.log("moreList ----- ", this.moreList);
     },
     generateWork() {
@@ -155,6 +142,12 @@ export default {
       console.log("payload-------- ", payload);
     },
   },
+  computed: {
+    isActive() {
+      return (index) => this.activeIndex === index;
+    }
+  }
+
 };
 </script>
 
@@ -202,9 +195,9 @@ p {
   border-color: transparent !important;
   box-shadow: none !important;
 }
-.create-work .create-btn {
-  display: flex;
-  gap: 10px;
-  justify-content: end;
+.active {
+   background: linear-gradient(to right, white  , darkorchid);
+   color: transparent;
+  background-clip: text;
 }
 </style>
