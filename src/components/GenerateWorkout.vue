@@ -139,6 +139,7 @@ export default {
         ...this.moreList,
         oftenTrain: this.oftenTrain,
       };
+     this.$router.push("/workSchedule");
       console.log("payload-------- ", payload);
     },
   },

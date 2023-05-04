@@ -2,11 +2,22 @@
   <div>
     <h1>Work schedule</h1>
     <div class="row m-1">
-      <div class="col box"  v-for="i in 6" :key="i">Day {{i}}</div>
+      <div
+        class="col box"
+        v-for="i in 6"
+        :key="i"
+        @click="changeListItem('day' + i)"
+      >
+        Day {{ i }}
+      </div>
     </div>
 
-    <div class="container content-below pt-4 m-2 font-bold">
-      <div class="content p-2">
+    <div class="container pt-4 font-bold">
+      <div
+        class="content p-2"
+        v-for="(data, index) in ApiData"
+        :key="index.Category"
+      >
         <div class="row">
           <div class="col-4 image">
             <img
@@ -15,29 +26,31 @@
           </div>
           <div class="col-8">
             <div class="heading">
-              Assisted Pull-ups With Wide Grip
-              <div class="below">
-                <div class="text-muted">Machine</div>
-                <div class="" v-for="i in 5" :key="i">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    fill="currentColor"
-                    class="bi bi-star"
-                    viewBox="0 0 16  16"
-                  >
-                    <path
-                      d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"
-                    />
-                  </svg>
+              {{ data.exercise_name }}
+              <div class="d-flex justify-content-between">
+                <div class="text-muted">{{ data.Category }}</div>
+                <div class="d-flex starContiner">
+                  <div class="starsDiv" v-for="i in 5" :key="i">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      fill="currentColor"
+                      class="bi bi-star"
+                      viewBox="0 0 16  16"
+                    >
+                      <path
+                        d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="row mt-4 content-set">
-              <div class="col">3 set</div>
-              <div class="col">10 rap</div>
-              <div class="col">10 kg</div>
+            <div class="mt-4 content-set d-flex">
+              <div class="">{{data.steps}} set</div>
+              <div class=""> rap</div>
+              <div class=""> kg</div>
             </div>
           </div>
         </div>
@@ -47,50 +60,179 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: "WorkSchedule",
-  data(){
-    //  List: [
-    //     { index:1,title: "Assisted Pull-Ups with Wide Grip", type: "Machine",sets:5,reps:3,weight:30 },
-    //     { index:2,title: "Standing Shoulder Press", type: "Barbell",sets:5,reps:3,weight:30 },
-    //     { index:3,title: "Deadlifts", type: "Barbell",sets:5,reps:3,weight:30 },
-    //     { index:4,title: "Squats", type: "Barbell",sets:5,reps:3,weight:30 },
-    //     { index:5,title: "Lateral Raises", type: "Dumbbells",sets:5,reps:3,weight:30 },
-    //     { index:6,title: "Crunches", type: "Body ,sets:5weight",sets:5,reps:3,weight:30 },
-    //   ]
-  }
+  data() {
+    return {
+      // list of items
+      listItem: [],
+      list: {
+        day1: [
+          {
+            index: 1,
+            title: "Assisted Pull-Ups with Wide Grip",
+            type: "Machine",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+          {
+            index: 3,
+            title: "Deadlifts",
+            type: "Barbell",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+        ],
+        day2: [
+          {
+            index: 2,
+            title: "Standing Shoulder Press",
+            type: "Barbell",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+          {
+            index: 5,
+            title: "Lateral Raises",
+            type: "Dumbbells",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+          {
+            index: 6,
+            title: "Crunches",
+            type: "Body",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+        ],
+        day3: [
+          {
+            index: 3,
+            title: "Deadlifts",
+            type: "Barbell",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+          {
+            index: 1,
+            title: "Assisted Pull-Ups with Wide Grip",
+            type: "Machine",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+        ],
+        day4: [
+          {
+            index: 2,
+            title: "Standing Shoulder Press",
+            type: "Barbell",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+        ],
+        day5: [
+          {
+            index: 6,
+            title: "Crunches",
+            type: "Body",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+        ],
+        day6: [
+          {
+            index: 3,
+            title: "Deadlifts",
+            type: "Barbell",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+          {
+            index: 2,
+            title: "Standing Shoulder Press",
+            type: "Barbell",
+            sets: 5,
+            reps: 3,
+            weight: 30,
+          },
+        ],
+      },
+      ApiData: [],
+    };
+  },
+  methods: {
+    // do display random items form list
+    changeListItem(i) {
+      this.listItem = this.list[i];
+    },
+  },
+  mounted() {
+    //display item of day1 initially
+    // this.listItem = this.list["day1"];
+    const apiUrl = "http://localhost:4000/api/getexcercise";
+    
+    axios
+      .get(apiUrl)
+      .then((response) => {
+        const exercises = response.data;
+        const apiData = [];
+        exercises.forEach((data) => {
+          apiData.push({
+            Category: data.Category,
+            exercise_name: data.exercise_name,
+            steps:data.steps.length
+          });
+
+          this.ApiData = apiData;
+          console.log("this",this.apiData)
+        });
+      }).catch((err) => {
+        console.error(err)
+      })
+  },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1,
-h2 {
+body {
+  color: #fff;
+}
+h1 {
   color: #fff;
 }
 .box {
   background-color: #fff;
   color: #000;
   border-radius: 5px;
-  font-size: 18px;
+  font-size: 16px;
   margin: 0px 3px;
-}
-.content-below {
-  color: #fff;
+  padding: 0px;
 }
 .grid-item {
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
   text-align: center;
-  color: #fff;
   display: flex;
   flex-direction: row;
 }
 .content {
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  box-shadow: 0 3px 10px rgb(181 181 181 / 20%);
   color: #fff;
 }
 .image img {
-  border-radius: 20px;
+  border-radius: 10px;
   height: 50%;
   width: 80%;
 }
@@ -99,13 +241,16 @@ h2 {
   text-align: left;
   font-weight: 700;
 }
-.below {
-  justify-content: space-between;
-  display: flex;
-}
 .content-set {
-  background: chocolate;
+  background: #6b645f;
   border-radius: 8px;
-  margin: 0px 20px;
+  padding: 5px;
+  justify-content: space-between;
+}
+.starContiner {
+  margin-right: 4%;
+}
+.starsDiv {
+  margin: 0px 2%;
 }
 </style>
