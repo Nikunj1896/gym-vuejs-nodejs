@@ -64,7 +64,7 @@
             />
           </div>
         </div>
-        <div class="mb-3 input-fields">
+        <!-- <div class="mb-3 input-fields">
           <label for="numberOfDays" class="form-label"
             >Number of days they train</label
           >
@@ -75,7 +75,7 @@
             name="numberOfDays"
             v-model="moreList.numberOfDays"
           />
-        </div>
+        </div> -->
       </form>
     </div>
   </div>
@@ -101,11 +101,8 @@ export default {
       createRef: false,
         activeIndex: null,
       trainList: [
-        { index:1,title: "1x", week: "Per Week" },
-        { index:2,title: "2x", week: "Per Week" },
         { index:3,title: "3x", week: "Per Week" },
         { index:4,title: "4x", week: "Per Week" },
-        { index:5,title: "5x", week: "Per Week" },
         { index:6,title: "6x", week: "Per Week" },
       ],
       oftenTrain: "",
@@ -113,7 +110,6 @@ export default {
         name: "",
         height: 0,
         weight: 0,
-        numberOfDays: 0,
       },
     };
   },
@@ -129,7 +125,6 @@ export default {
         name: this.moreList.name,
         height: this.moreList.height,
         weight: this.moreList.weight,
-        numberOfDays: this.moreList.numberOfDays,
       };
       this.createRef = false;
       console.log("moreList ----- ", this.moreList);

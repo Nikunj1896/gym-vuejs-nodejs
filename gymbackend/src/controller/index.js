@@ -5,19 +5,18 @@ const createExercise = async (req, res) => {
         const { Category, Difficulty, Force, Grips, details, exercise_name, steps, target, videoURL, youtubeURL } = req.body;
         const exercise = new Excercise({ Category, Difficulty, Force, Grips, details, exercise_name, steps, target, videoURL, youtubeURL });
         const newExercise = await exercise.save();
-        res.status(201).json(newExercise);
+        res.status(200).json(newExercise);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: error });
     }
 }
 
 const getAllExercise = async (req, res) => {
     try {
         const excercise = await Excercise.find();
-        res.json(excercise)
-    } catch (err) {
-        res.status(400).json({ messgae: "Bad request" })
+        res.status(200).json(excercise)
+    } catch (error) {
+        res.status(400).json({ messgae: error })
     }
 }
 const getExerciseById = async (req, res) => {
