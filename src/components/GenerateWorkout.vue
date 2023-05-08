@@ -10,10 +10,13 @@
     <div class="row grid-container">
       <div
         class="col-sm-6 grid-item"
-        v-for="(list,index) in trainList"
-        :key="list.title"  
+        v-for="(list, index) in trainList"
+        :key="list.title"
       >
-        <div @click="getInputList(list,index)"  :class="{ active: isActive(index) }">
+        <div
+          @click="getInputList(list, index)"
+          :class="{ active: isActive(index) }"
+        >
           {{ list.title }} <span>{{ list.week }}</span>
         </div>
       </div>
@@ -96,14 +99,20 @@
 <script>
 export default {
   name: "GenerateWorkout",
+   props: {
+    paramsData: {
+      type: Object, // Set the type to object
+      required: true, // Make the prop required
+    },
+  },
   data() {
     return {
       createRef: false,
-        activeIndex: null,
+      activeIndex: null,
       trainList: [
-        { index:3,title: "3x", week: "Per Week" },
-        { index:4,title: "4x", week: "Per Week" },
-        { index:6,title: "6x", week: "Per Week" },
+        { index: 3, title: "3x", week: "Per Week" },
+        { index: 4, title: "4x", week: "Per Week" },
+        { index: 6, title: "6x", week: "Per Week" },
       ],
       oftenTrain: "",
       moreList: {
@@ -114,8 +123,7 @@ export default {
     };
   },
   methods: {
-    getInputList(item,index) {
-      console.log("items", item.title);
+    getInputList(item, index) {
       this.oftenTrain = item.title;
 
       this.activeIndex = index;
@@ -127,22 +135,23 @@ export default {
         weight: this.moreList.weight,
       };
       this.createRef = false;
-      console.log("moreList ----- ", this.moreList);
     },
     generateWork() {
       const payload = {
         ...this.moreList,
         oftenTrain: this.oftenTrain,
       };
-     this.$router.push("/workSchedule");
-      console.log("payload-------- ", payload);
+      this.$router.push({
+        name: "allWorkSchedule",
+        params: { data: JSON.stringify(payload) },
+      });
     },
   },
   computed: {
     isActive() {
       return (index) => this.activeIndex === index;
-    }
-  }
+    },
+  }, 
 
 };
 </script>
@@ -192,8 +201,8 @@ p {
   box-shadow: none !important;
 }
 .active {
-   background: linear-gradient(to right, white  , darkorchid);
-   color: transparent;
+  background: linear-gradient(to right, white, darkorchid);
+  color: transparent;
   background-clip: text;
 }
 </style>

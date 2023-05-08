@@ -6,7 +6,7 @@ const ratingSchema = new mongoose.Schema({
         required: true
     },
     excersizeId: {
-        type: String,
+        type: Number,
         required: true
     }
 });

@@ -5,6 +5,9 @@
       <div class="col box" v-for="i in 6" :key="i">Day {{ i }}</div>
     </div>
     <div class="container pt-4 font-bold">
+      <div class="text-white" v-if="this.paramsData.name">
+        Hi {{ this.paramsData.name }} your workout has been generated
+      </div>
       <div class="content p-2" v-for="data in ApiData" :key="data.id">
         <div class="row">
           <div class="col-4 image">
@@ -19,7 +22,22 @@
               <div class="d-flex justify-content-between">
                 <div class="text-muted">{{ data.Category }}</div>
                 <div class="d-flex starContiner">
-                  <star-rating  @update:rating="setRating" @click="sendId(data.id)" :star-size="20">
+                  <star-rating
+                    v-if="!this.displayStars"
+                    @update:rating="!setRating"
+                    @click="sendId(data.id)"
+                    :star-size="20"
+                  >
+                  </star-rating>
+                  <star-rating
+                    v-else
+                    v-for="item in data.filledStar"
+                    :key="item"
+                    @update:rating="!setRating"
+                    @click="sendId(data.id)"
+                    :star-size="20"
+                    :rating="item.rating"
+                  >
                   </star-rating>
                 </div>
               </div>
@@ -82,9 +100,11 @@
         </div>
       </div>
       <div className="pt-2 pb-2 ">
-        <button @click="regenrate" className="regenrateButton rounded">Regenrate Exercises</button>
+        <button @click="regenrate" className="regenrateButton rounded">
+          Regenrate Exercises
+        </button>
       </div>
-          </div>
+    </div>
   </div>
 </template>
 
@@ -93,39 +113,63 @@ import axios from "axios";
 import StarRating from "vue-star-rating";
 export default {
   name: "WorkSchedule",
+  props: {
+    paramsData: {},
+  },
   data() {
     return {
       ApiData: [],
       rating: 0,
-      cardId:""
+      displayStars: false,
     };
   },
   methods: {
     sendId(id) {
-      this.cardId = id
-
       axios
-      .post("http://localhost:4000/api/rating",{
-        rating: this.rating,
-        excersizeId:this.cardId
-      })
-      .then((response) => {
-        console.log("repsose",response)
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+        .post("http://localhost:4000/api/rating", {
+          rating: this.rating,
+          excersizeId: id,
+        })
+        .then((response) => {
+          console.log("repsose", response);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     },
     setRating(rating) {
       this.rating = rating;
-      
     },
-    regenrate(){
-      console.log("clicked");
-    }
+    regenrate() {
+      this.displayStars = true;
+      console.log("aaa", this.displayStars);
+      const newData = [];
+      axios
+        .get("http://localhost:4000/api/addRating")
+        .then((res) => {
+          const aa = res.data.data;
+          aa.map((data) => {
+            newData.push({
+              id: data.id,
+              Category: data.Category,
+              exercise_name: data.exercise_name,
+              steps: data.steps.length,
+              video: [...data.videoURL],
+              stepsDes: [...data.steps],
+              isOpen: false,
+              stepsOpen: false,
+              filledStar:data.ratingList
+            });
+          });
+          this.ApiData = newData;
+          console.log('aaa', newData)
+        })
+        .catch((err) => {
+          console.log("err*********", err);
+        });
+    },
   },
   mounted() {
-    //display item of day1 initially
     const apiUrl = "http://localhost:4000/api/getexcercise";
 
     axios
@@ -134,9 +178,8 @@ export default {
         const exercises = response.data;
         const apiData = [];
         exercises.forEach((data) => {
-          // console.log("sa", data);
           apiData.push({
-            id: data._id,
+            id: data.id,
             Category: data.Category,
             exercise_name: data.exercise_name,
             steps: data.steps.length,
@@ -223,8 +266,8 @@ h1 {
   margin-left: 4%;
 }
 .regenrateButton{
-background-color: #6b645f;
-color: #fff;
-padding: 2px 18px;
+  background-color: #6b645f;
+  color: #fff;
+  padding: 2px 18px;
 }
 </style>

@@ -2,8 +2,8 @@ const Excercise = require("../model/Excercise");
 
 const createExercise = async (req, res) => {
     try {
-        const { Category, Difficulty, Force, Grips, details, exercise_name, steps, target, videoURL, youtubeURL } = req.body;
-        const exercise = new Excercise({ Category, Difficulty, Force, Grips, details, exercise_name, steps, target, videoURL, youtubeURL });
+        const { Category, Difficulty, Force, Grips, details, exercise_name, steps, target, videoURL, youtubeURL ,id} = req.body;
+        const exercise = new Excercise({ id,Category, Difficulty, Force, Grips, details, exercise_name, steps, target, videoURL, youtubeURL });
         const newExercise = await exercise.save();
         res.status(200).json(newExercise);
     } catch (error) {
@@ -60,9 +60,10 @@ const getAttributeData = async (req, res) => {
     }
 
 }
+
 module.exports = {
     createExercise,
     getExerciseById,
     getAllExercise,
-    getAttributeData
+    getAttributeData,
 }

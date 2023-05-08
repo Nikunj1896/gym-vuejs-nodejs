@@ -18,7 +18,7 @@ const routes = [
   //   component: () => import('../views/CreateWorkView.vue')
   // },
   {
-    path: '/workSchedule',
+    path: '/workSchedule/:data',
     name: 'allWorkSchedule',
     component: () => import('../views/WorkScheduleView.vue')
   }

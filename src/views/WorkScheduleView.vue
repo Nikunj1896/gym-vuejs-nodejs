@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <WorkSchedule />
+  <div v-if="paramsData">
+    <WorkSchedule :paramsData="paramsData"  />
   </div>
 </template>
 
@@ -10,6 +10,18 @@ import WorkSchedule from "@/components/WorkSchedule.vue";
 
 export default {
   name: "WorkScheduleView",
+  data() {
+    return {
+      paramsData: null,
+    };
+  },
+  mounted() {
+    if (this.$route.params.data) {
+      this.paramsData = JSON.parse(this.$route.params.data)
+    } else {
+      console.log("Data parameter not defined");
+    }
+  },
   components: {
     WorkSchedule,
   },
