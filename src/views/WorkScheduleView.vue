@@ -18,6 +18,7 @@ export default {
   mounted() {
     if (this.$route.params.data) {
       this.paramsData = JSON.parse(this.$route.params.data)
+      console.log('paramsdata', this.paramsdata)
     } else {
       console.log("Data parameter not defined");
     }

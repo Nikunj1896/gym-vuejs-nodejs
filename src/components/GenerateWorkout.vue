@@ -91,7 +91,7 @@
       type="button"
       class="btn btn-primary generate-btn"
     >
-      Generate workout
+    Generate Workout
     </button>
   </div>
 </template>
@@ -120,6 +120,7 @@ export default {
         height: 0,
         weight: 0,
       },
+      payload:""
     };
   },
   methods: {
@@ -141,6 +142,8 @@ export default {
         ...this.moreList,
         oftenTrain: this.oftenTrain,
       };
+      this.payload = payload
+      // console.log('payload', payload)
       this.$router.push({
         name: "allWorkSchedule",
         params: { data: JSON.stringify(payload) },

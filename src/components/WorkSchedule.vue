@@ -24,7 +24,7 @@
                 <div class="d-flex starContiner">
                   <star-rating
                     v-if="!this.displayStars"
-                    @update:rating="!setRating"
+                    @update:rating="setRating"
                     @click="sendId(data.id)"
                     :star-size="20"
                   >
@@ -33,7 +33,7 @@
                     v-else
                     v-for="item in data.filledStar"
                     :key="item"
-                    @update:rating="!setRating"
+                    @update:rating="setRating"
                     @click="sendId(data.id)"
                     :star-size="20"
                     :rating="item.rating"
@@ -99,7 +99,7 @@
           </div>
         </div>
       </div>
-      <div className="pt-2 pb-2 ">
+      <div className="pt-2 pb-2">
         <button @click="regenrate" className="regenrateButton rounded">
           Regenrate Exercises
         </button>
@@ -125,6 +125,7 @@ export default {
   },
   methods: {
     sendId(id) {
+      console.log("id",id,this.rating);
       axios
         .post("http://localhost:4000/api/rating", {
           rating: this.rating,
@@ -188,7 +189,6 @@ export default {
             isOpen: false,
             stepsOpen: false,
           });
-
           this.ApiData = apiData;
           // console.log("this", this.ApiData);
         });
