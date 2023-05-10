@@ -23,8 +23,7 @@
     </div>
     <div class="recommend">
       <span @click="createRef = true"
-        >We are recommended 3+ workout for beginners.</span
-      >
+        >We are recommended 3+ workout for beginners.</span>
     </div>
   </div>
 
@@ -67,18 +66,6 @@
             />
           </div>
         </div>
-        <!-- <div class="mb-3 input-fields">
-          <label for="numberOfDays" class="form-label"
-            >Number of days they train</label
-          >
-          <input
-            type="number"
-            class="form-control"
-            id="numberOfDays"
-            name="numberOfDays"
-            v-model="moreList.numberOfDays"
-          />
-        </div> -->
       </form>
     </div>
   </div>
@@ -91,7 +78,7 @@
       type="button"
       class="btn btn-primary generate-btn"
     >
-    Generate Workout
+      Generate Workout
     </button>
   </div>
 </template>
@@ -99,7 +86,7 @@
 <script>
 export default {
   name: "GenerateWorkout",
-   props: {
+  props: {
     paramsData: {
       type: Object, // Set the type to object
       required: true, // Make the prop required
@@ -120,7 +107,8 @@ export default {
         height: 0,
         weight: 0,
       },
-      payload:""
+      payload: "",
+      data: "",
     };
   },
   methods: {
@@ -142,8 +130,7 @@ export default {
         ...this.moreList,
         oftenTrain: this.oftenTrain,
       };
-      this.payload = payload
-      // console.log('payload', payload)
+      this.payload = payload;
       this.$router.push({
         name: "allWorkSchedule",
         params: { data: JSON.stringify(payload) },
@@ -154,7 +141,7 @@ export default {
     isActive() {
       return (index) => this.activeIndex === index;
     },
-  }, 
+  },
 
 };
 </script>
