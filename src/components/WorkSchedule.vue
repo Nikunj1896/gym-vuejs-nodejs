@@ -46,10 +46,10 @@
       </div>
     </div>
     <div class="container pt-4 font-bold">
-      <div v-if="!noExercise"> 
-      <div class="text-white" v-if="this.paramsData.name">
-        Hi {{ this.paramsData.name }} your workout has been generated
-      </div>
+      <div v-if="!noExercise">
+        <div class="text-white" v-if="this.paramsData.name">
+          Hi {{ this.paramsData.name }} your workout has been generated
+        </div>
         <div class="content p-2" v-for="data in ApiData" :key="data.id">
           <div class="row">
             <div class="col-4 image">
@@ -73,12 +73,11 @@
                     </star-rating>
                     <star-rating
                       v-else
-                      v-for="item in data.filledStar"
-                      :key="item"
+                   
                       @update:rating="setRating"
                       @click="sendId(data.id)"
                       :star-size="20"
-                      :rating="item.rating"
+                      :rating="data.rating"
                     >
                     </star-rating>
                   </div>
@@ -141,15 +140,13 @@
             </div>
           </div>
         </div>
-      <div className="pt-2 pb-2">
-        <button @click="regenrate" className="regenrateButton rounded">
-          Regenrate Exercises
-        </button>
+        <div className="pt-2 pb-2">
+          <button @click="regenrate" className="regenrateButton rounded">
+            Regenrate Exercises
+          </button>
+        </div>
       </div>
-      </div>
-      <div v-else className="text-light fw-bold fs-1">
-       Let Yourself Rest.
-      </div>
+      <div v-else className="text-light fw-bold fs-1">Let Yourself Rest.</div>
     </div>
   </div>
 </template>
@@ -179,14 +176,9 @@ export default {
     },
     // fetch excercises as per given ids
     fetchExerciseData(ids) {
-      const apiUrl = "https://musclewiki.p.rapidapi.com/exercises/";
-      const headers = {
-        "x-rapidapi-key": "efcf7f0320mshbc0050f3d148c15p1cb8c9jsn6b0c26f1c735",
-        "x-rapidapi-host": "musclewiki.p.rapidapi.com",
-        useQueryString: true,
-      };
+      const apiUrl = "http://localhost:4000/api/excercise/";
       const promises = ids.map((id) => {
-        return fetch(apiUrl + id, { headers })
+        return fetch(apiUrl + id)
           .then((response) => response.json())
           .then((data) => ({
             id: data.id,
@@ -195,9 +187,10 @@ export default {
             steps: data.steps.length,
             video: [...data.videoURL],
             stepsDes: [...data.steps],
+            target: data.target.Primary[0],
             isOpen: false,
             stepsOpen: false,
-            filledStar: data.ratingList,
+            // filledStar: data.ratingList,
           }));
       });
       return Promise.all(promises);
@@ -240,7 +233,7 @@ export default {
               console.error(error);
             });
         } else if (i == 5) {
-           this.noExercise = false;
+          this.noExercise = false;
           const dat4 = [158, 164, 132, 534, 753];
           this.fetchExerciseData(dat4)
             .then((dataArray) => {
@@ -252,7 +245,7 @@ export default {
             });
         } else if (i == 3) {
           this.noExercise = true;
-        }else if (i == 6) {
+        } else if (i == 6) {
           this.noExercise = true;
         }
       } else {
@@ -276,42 +269,70 @@ export default {
       this.rating = rating;
     },
     regenrate() {
+      console.log("this.Apidata", this.ApiData);
       this.displayStars = true;
-      const newData = [];
       axios
-        .get("http://localhost:4000/api/addRating")
+        .post("http://localhost:4000/api/addTestRating", { Data: this.ApiData })
         .then((res) => {
-          const aa = res.data.data;
-          aa.map((data) => {
-            newData.push({
-              id: data.id,
-              Category: data.Category,
-              exercise_name: data.exercise_name,
-              steps: data.steps.length,
-              video: [...data.videoURL],
-              stepsDes: [...data.steps],
-              isOpen: false,
-              stepsOpen: false,
-              filledStar: data.ratingList,
-            });
-          });
-          this.ApiData = newData;
+          const Data = res.data;
+          Data.map((item) => ({
+            id: item.id,
+            Category: item.Category,
+            exercise_name: item.exercise_name,
+            steps: item.steps.length,
+            video: [...item.video],
+            stepsDes: [...item.stepsDes],
+            target: item.target,
+            isOpen: false,
+            stepsOpen: false,
+            filledStar: item.rating,
+          }));
+          this.ApiData = Data
+          console.log("res=====", Data);
+          console.log('  this.displayStars',   this.displayStars)
         })
         .catch((err) => {
-          console.error(err);
+          console.error("err", err);
         });
     },
+    // regenrate() {
+    //   console.log('this.Apidata', this.ApiData)
+    //   this.displayStars = true;
+    //   // const newData = [];
+    //   axios
+    //     .get("http://localhost:4000/api/addRating")
+    //     .then((res) => {
+    //       const aa = res.data.data;
+    //       aa.map((data) => {
+    //         newData.push({
+    //           id: data.id,
+    //           Category: data.Category,
+    //           exercise_name: data.exercise_name,
+    //           steps: data.steps.length,
+    //           video: [...data.videoURL],
+    //           stepsDes: [...data.steps],
+    //           target: data.target.Primary[0],
+    //           isOpen: false,
+    //           stepsOpen: false,
+    //           filledStar: data.ratingList,
+    //         });
+    //       });
+    //       this.ApiData = newData;
+    //     })
+    //     .catch((err) => {
+    //       console.error(err);
+    //     });
+    // },
   },
   async mounted() {
     // get all excercise initially
     const apiUrl = "http://localhost:4000/api/getexcercise";
-
     axios
       .get(apiUrl)
       .then((response) => {
-        const exercises = response.data;
+        const exercises = response.data.data;
         const apiData = [];
-        exercises.forEach((data) => {
+        exercises.map((data) => {
           apiData.push({
             id: data.id,
             Category: data.Category,
@@ -319,6 +340,7 @@ export default {
             steps: data.steps.length,
             video: [...data.videoURL],
             stepsDes: [...data.steps],
+            target: data.target.Primary[0],
             isOpen: false,
             stepsOpen: false,
           });
