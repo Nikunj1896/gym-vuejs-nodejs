@@ -84,7 +84,7 @@
                 </div>
               </div>
               <div class="mt-4 content-set d-flex">
-                <div class="">{{ data.steps }} set</div>
+                <div class="">set</div>
                 <div class="">rap</div>
                 <div class="">kg</div>
               </div>
@@ -110,7 +110,7 @@
             <!-- videos dropdown -->
             <div v-if="data.isOpen">
               <div class="card card-body">
-                <div v-for="video in data.video" :key="video">
+                <div v-for="video in data.videoURL" :key="video">
                   <video :src="video" autoplay className="videoFrame"></video>
                 </div>
               </div>
@@ -141,7 +141,13 @@
           </div>
         </div>
         <div className="pt-2 pb-2">
-          <button @click="regenrate" className="regenrateButton rounded">
+          <button
+            @click="regenrate"
+            :disabled="this.disableButton == true"
+            v-bind:class="
+              this.disableButton ? 'Disable rounded' : 'regenrateButton rounded'
+            "
+          >
             Regenrate Exercises
           </button>
         </div>
@@ -167,12 +173,12 @@ export default {
       activeIndex: null,
       selectedWeek: "Week 1",
       noExercise: false,
+      disableButton: false, //disable button after click
     };
   },
   methods: {
     selectWeek(week) {
       this.selectedWeek = week;
-      console.log("this.selectedWeek", this.selectedWeek);
     },
     // fetch excercises as per given ids
     fetchExerciseData(ids) {
@@ -185,24 +191,30 @@ export default {
             Category: data.Category,
             exercise_name: data.exercise_name,
             steps: data.steps.length,
-            video: [...data.videoURL],
+            videoURL: [...data.videoURL],
             stepsDes: [...data.steps],
-            target: data.target.Primary[0],
+            target: data.target,
             isOpen: false,
             stepsOpen: false,
-            // filledStar: data.ratingList,
           }));
       });
       return Promise.all(promises);
     },
+    // fetch data as per day selected
     fetchDay(i) {
+      this.disableButton = false;
       this.activeIndex = i;
       if (this.paramsData.oftenTrain == "4x") {
-        console.log("insdie");
-        if (i == 1) {
+        if (i === 1 || i === 2 || i === 4 || i === 5) {
           this.noExercise = false;
-          const ids = [67, 69, 449, 445, 383, 0, 282];
-          this.fetchExerciseData(ids)
+
+          let exerciseIds = [];
+          if (i === 1) exerciseIds = [67, 69, 449, 445, 383, 0, 282];
+          else if (i === 2) exerciseIds = [130, 891, 131, 502, 752];
+          else if (i === 4) exerciseIds = [72, 71, 446, 51, 357, 21, 279];
+          else if (i === 5) exerciseIds = [158, 164, 132, 534, 753];
+
+          this.fetchExerciseData(exerciseIds)
             .then((dataArray) => {
               console.log(dataArray);
               this.ApiData = dataArray;
@@ -210,48 +222,55 @@ export default {
             .catch((error) => {
               console.error(error);
             });
-        } else if (i == 2) {
-          this.noExercise = false;
-          const dat2 = [130, 891, 131, 502, 752];
-          this.fetchExerciseData(dat2)
-            .then((dataArray) => {
-              console.log(dataArray);
-              this.ApiData = dataArray;
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        } else if (i == 4) {
-          this.noExercise = false;
-          const dat3 = [72, 71, 446, 51, 357, 21, 279];
-          this.fetchExerciseData(dat3)
-            .then((dataArray) => {
-              console.log(dataArray);
-              this.ApiData = dataArray;
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        } else if (i == 5) {
-          this.noExercise = false;
-          const dat4 = [158, 164, 132, 534, 753];
-          this.fetchExerciseData(dat4)
-            .then((dataArray) => {
-              console.log(dataArray);
-              this.ApiData = dataArray;
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        } else if (i == 3) {
+        } else if (i === 3 || i === 6) {
           this.noExercise = true;
-        } else if (i == 6) {
+        }
+      } else if (this.paramsData.oftenTrain == "3x") {
+        if (i === 1 || i === 3 || i === 5) {
+          this.noExercise = false;
+
+          let exerciseIds = [];
+          if (i === 1) exerciseIds = [67, 69, 449, 51, 94, 388];
+          else if (i === 3) exerciseIds = [383, 0, 361, 1, 415, 279];
+          else if (i === 5) exerciseIds = [130, 132, 502, 753, 752, 824, 879];
+
+          this.fetchExerciseData(exerciseIds)
+            .then((dataArray) => {
+              console.log(dataArray);
+              this.ApiData = dataArray;
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        } else if (i === 2 || i === 4 || i == 6) {
           this.noExercise = true;
+        }
+      } else if (this.paramsData.oftenTrain == "6x") {
+        if (i === 1 || i == 2 || i === 3 || i == 4 || i === 5 || i == 6) {
+          this.noExercise = false;
+
+          let exerciseIds = [];
+          if (i === 1) exerciseIds = [447, 445, 449, 37, 267];
+          else if (i === 2) exerciseIds = [447, 445, 449, 37, 267];
+          else if (i === 3) exerciseIds = [130, 601, 132, 753, 879];
+          else if (i === 4) exerciseIds = [67, 72, 383, 357, 298];
+          else if (i === 5) exerciseIds = [449, 130, 879, 753];
+          else if (i === 6) exerciseIds = [601, 130, 879, 753];
+
+          this.fetchExerciseData(exerciseIds)
+            .then((dataArray) => {
+              console.log(dataArray);
+              this.ApiData = dataArray;
+            })
+            .catch((error) => {
+              console.error(error);
+            });
         }
       } else {
         console.log("outside");
       }
     },
+    // set rating data
     sendId(id) {
       axios
         .post("http://localhost:4000/api/rating", {
@@ -268,61 +287,21 @@ export default {
     setRating(rating) {
       this.rating = rating;
     },
+    // regerate exercise
     regenrate() {
-      console.log("this.Apidata", this.ApiData);
       this.displayStars = true;
+      this.disableButton = true;
       axios
         .post("http://localhost:4000/api/addTestRating", { Data: this.ApiData })
         .then((res) => {
           const Data = res.data;
-          Data.map((item) => ({
-            id: item.id,
-            Category: item.Category,
-            exercise_name: item.exercise_name,
-            steps: item.steps.length,
-            video: [...item.video],
-            stepsDes: [...item.stepsDes],
-            target: item.target,
-            isOpen: false,
-            stepsOpen: false,
-            filledStar: item.rating,
-          }));
-          this.ApiData = Data
-          console.log("res=====", Data);
-          console.log('  this.displayStars',   this.displayStars)
+          // Data.map((item) => console.log("item",item));
+          this.ApiData = Data;
         })
         .catch((err) => {
           console.error("err", err);
         });
     },
-    // regenrate() {
-    //   console.log('this.Apidata', this.ApiData)
-    //   this.displayStars = true;
-    //   // const newData = [];
-    //   axios
-    //     .get("http://localhost:4000/api/addRating")
-    //     .then((res) => {
-    //       const aa = res.data.data;
-    //       aa.map((data) => {
-    //         newData.push({
-    //           id: data.id,
-    //           Category: data.Category,
-    //           exercise_name: data.exercise_name,
-    //           steps: data.steps.length,
-    //           video: [...data.videoURL],
-    //           stepsDes: [...data.steps],
-    //           target: data.target.Primary[0],
-    //           isOpen: false,
-    //           stepsOpen: false,
-    //           filledStar: data.ratingList,
-    //         });
-    //       });
-    //       this.ApiData = newData;
-    //     })
-    //     .catch((err) => {
-    //       console.error(err);
-    //     });
-    // },
   },
   async mounted() {
     // get all excercise initially
@@ -337,8 +316,7 @@ export default {
             id: data.id,
             Category: data.Category,
             exercise_name: data.exercise_name,
-            steps: data.steps.length,
-            video: [...data.videoURL],
+            videoURL: [...data.videoURL],
             stepsDes: [...data.steps],
             target: data.target.Primary[0],
             isOpen: false,
@@ -442,5 +420,8 @@ h1 {
   background-color: #6c757d;
   color: white;
   background-clip: text;
+}
+.Disable {
+  background-color: #6b645f;
 }
 </style>

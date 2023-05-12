@@ -115,71 +115,62 @@ const addTestRating = async (req, res) => {
         .filter(product => product.rating !== null);
 
     const sortedProducts = filteredProducts.sort((a, b) => b.rating - a.rating);
-
-    res.send(sortedProducts)
-
-    // new=========================================
-
-    const filteredData = sortedProducts.filter((item) => item.rating < 2);
-
-    // console.log('filteredData', filteredData)
+    const filteredData = sortedProducts.filter((item) => item.rating <= 2);
 
     const response = await axios.get(ApiUrl, options);
+    let array = response.data
 
-    // Match the filtered data with aa
-    const matchedData = response.data.filter((item) => {
-
-        return item.Category == filteredData.map((i) => i.Category)
-})
-    //     // Check if the item's Category matches with any of the filteredData's categories
-
-    //     const categoryMatch = filteredData.some(
-    //       (fdItem) => fdItem.Category === item.Category &&
-    //     );
-
-    //     // console.log('categoryMatch', categoryMatch)
-
-    //     // Check if any of the Primary target matches with the filteredData's target
-    //     const targetMatch = item?.target?.Primary?.some((pItem) =>
-    //       filteredData?.some((fdItem) => fdItem.target === pItem)
-    //     );
-    //     // console.log('targetMatch', targetMatch)
-
-    //     // If both the conditions are true, return the item
-    //     if (categoryMatch && targetMatch) {
-    //       return true;
-    //     }
-
-    //     return false;
-    //   });
-
-    // Print the matched data
-    console.log("111111111111111111!!:", matchedData);
-
-
-
-
-    // old==========================
-    // const response = await axios.get(ApiUrl, options);
-    // let dataTemp = []
-    // sortedProducts.map((it) => {
-    //     dataTemp.push(it.target)
-    // })
-    // let array = response.data
-
-    // let resulta = {};
+    let dataTemp = []
+    filteredData.map((it) => {
+        dataTemp.push({ target: it.target, category: it.Category })
+    })
+    let resulta = {};
+    let FilterApiData = []  //Contain all filter data from APi
 
     // dataTemp.forEach((key) => {
+    //     console.log("key",key)
     //     resulta[key] = [];
     //     array.forEach((obj) => {
-    //         if (obj.target.Primary?.includes(key)) {
-    //             resulta[key].push(obj);
+    //         if (obj.Category == key.category && obj.target.Primary?.includes(key.target)) {
+    //             FilterApiData.push(obj)
     //         }
     //     });
     // });
 
-    // console.log("result-----", resulta);
+    dataTemp.forEach((key) => {
+        resulta[key] = [];
+        array.forEach((obj) => {
+            if (obj.Category == key.category && key.target.Primary) {
+                if (typeof key.target.Primary === "string") {
+                    if (obj.target.Primary && obj.target.Primary.includes(key.target.Primary)) {
+                        FilterApiData.push(obj)
+                    }
+                } else if (Array.isArray(key.target.Primary)) {
+                    for (let i = 0; i < key.target.Primary.length; i++) {
+                        if (obj.target.Primary && obj.target.Primary.includes(key.target.Primary[i])) {
+                            FilterApiData.push(obj)
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+    });
 
+    FilterApiData.forEach(obj2 => {
+        const obj1 = filteredData.find(obj1 => obj1.Category === obj2.Category && obj2.id != obj1.id);
+        if (obj1) {
+            const index = filteredData.indexOf(obj1);
+            obj2.rating = obj1.rating;
+            obj2.stepsDes = obj1.stepsDes;
+            filteredData[index] = obj2;
+        }
+    });
+    const newFilter = sortedProducts.filter((item) => item.rating > 2)
+
+    newFilter.push(filteredData)
+    const flatArray = newFilter.flat()
+    res.send(flatArray)
 }
 
 module.exports = { postRating, addRating, addTestRating }
