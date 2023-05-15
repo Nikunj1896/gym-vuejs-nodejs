@@ -47,25 +47,37 @@ const getExerciseById = async (req, res) => {
     }
 }
 
-const getAttributeData = async (req, res) => {
-    // {Category :"Barbell"}  Dumbbells
-    // let filter = {
-    //     ...(Category &&  {Category: { $in: categories }}),
-    //     ...(Difficulty &&  {Difficulty: { $in: difficulties }}),
-    //     ...(Force &&  {Force: { $in: forces }})
-    // }
+const searchExcercise = async (req, res) => {
     try {
-        const data = await Excercise.aggregate(
-            [{
-                $match: {
-                    Category: {
-                        $in: dd
-                    }
+        const allExercise = [];
+        const { searchKeyword, category, muscles, force } = req.body;
+
+        axios.get(ApiUrl, options)
+            .then((response) => {
+                response.data.map((item) => {
+                    return allExercise.push(item)
+                })
+                let filteredExercises = allExercise;
+
+                if (category) {
+                    filteredExercises = filteredExercises.filter(exercise => exercise.Category === category);
                 }
-            }]
-        )
-        console.log("qwqqq--------", data);
-        res.json({ message: data })
+
+                if (muscles) {
+                    filteredExercises = filteredExercises.filter(exercise => exercise.target?.Primary?.includes(muscles) || exercise.target.Secondary?.includes(muscles));
+                }
+
+                if (force) {
+                    filteredExercises = filteredExercises.filter(exercise => exercise.Force === force);
+                }
+
+                if (searchKeyword) {
+                    const keyword = searchKeyword.toLowerCase();
+                    filteredExercises = filteredExercises.filter(exercise => exercise.exercise_name.toLowerCase().includes(keyword));
+                }
+                res.send(filteredExercises);
+            }).catch((err) => { res.status(400).json({ messgae: `Error in fetching Data ${err}` }) })
+
     } catch (err) {
         res.json(err)
         console.log(("errrr==============", err));
@@ -77,5 +89,5 @@ module.exports = {
     createExercise,
     getExerciseById,
     getAllExercise,
-    getAttributeData,
+    searchExcercise,
 }

@@ -12,11 +12,11 @@ const routes = [
     name: 'generateWorkout',
     component: () => import('../views/GenerateWorkView.vue')
   },
-  // {
-  //   path: '/createWork',
-  //   name: 'createWork',
-  //   component: () => import('../views/CreateWorkView.vue')
-  // },
+  {
+    path: '/searchWorkout',
+    name: 'searchWorkout',
+    component: () => import('../views/SearchWorkout.vue')
+  },
   {
     path: '/workSchedule/:data',
     name: 'allWorkSchedule',

@@ -18,12 +18,15 @@
           :class="{ active: isActive(index) }"
         >
           {{ list.title }} <span>{{ list.week }}</span>
+          <br />
         </div>
+        <span className="text"> <i>[ {{ list.text }}]</i> </span>
       </div>
     </div>
     <div class="recommend">
       <span @click="createRef = true"
-        >We are recommended 3+ workout for beginners.</span>
+        >We are recommended 3+ workout for beginners.</span
+      >
     </div>
   </div>
 
@@ -42,6 +45,7 @@
             id="name"
             name="name"
             v-model="moreList.name"
+            placeholder="Please Enter Name"
           />
         </div>
         <div class="row">
@@ -72,13 +76,20 @@
   <div>
     <p class="back">Help</p>
   </div>
-  <div>
+  <div className="pb-2">
     <button
       @click="generateWork()"
       type="button"
-      class="btn btn-primary generate-btn"
+      class="btn btn-primary generate-btn m-2"
     >
       Generate Workout
+    </button>
+    <button
+      @click="searchWorkout()"
+      type="button"
+      class="btn btn-primary generate-btn m-2"
+    >
+      Search Workout
     </button>
   </div>
 </template>
@@ -97,9 +108,19 @@ export default {
       createRef: false,
       activeIndex: null,
       trainList: [
-        { index: 3, title: "3x", week: "Per Week" },
-        { index: 4, title: "4x", week: "Per Week" },
-        { index: 6, title: "6x", week: "Per Week" },
+        { index: 3, title: "3x", week: "Per Week", text: "Alternate Split" },
+        {
+          index: 4,
+          title: "4x",
+          week: "Per Week",
+          text: "Upper / Lower split",
+        },
+        {
+          index: 6,
+          title: "6x",
+          week: "Per Week",
+          text: "Push / Pull / Legs split",
+        },
       ],
       oftenTrain: "",
       moreList: {
@@ -136,6 +157,9 @@ export default {
         params: { data: JSON.stringify(payload) },
       });
     },
+    searchWorkout() {
+      this.$router.push('/searchWorkout');
+    },
   },
   computed: {
     isActive() {
@@ -157,6 +181,7 @@ p {
   text-align: left;
   font-size: 20px;
   color: #4848f2;
+  padding: 0px 17px;
 }
 .grid-container {
   padding: 10px;

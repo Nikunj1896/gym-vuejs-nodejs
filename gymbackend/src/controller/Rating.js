@@ -2,8 +2,6 @@ const { default: axios } = require("axios");
 const Exersise = require("../model/Excercise");
 const Rating = require("../model/Rating");
 
-const { getAllExercise } = require('./index.js');
-
 const ApiUrl = "https://musclewiki.p.rapidapi.com/exercises"
 const options = {
     headers: {
@@ -123,19 +121,10 @@ const addTestRating = async (req, res) => {
     let dataTemp = []
     filteredData.map((it) => {
         dataTemp.push({ target: it.target, category: it.Category })
-    })
+        })
     let resulta = {};
     let FilterApiData = []  //Contain all filter data from APi
 
-    // dataTemp.forEach((key) => {
-    //     console.log("key",key)
-    //     resulta[key] = [];
-    //     array.forEach((obj) => {
-    //         if (obj.Category == key.category && obj.target.Primary?.includes(key.target)) {
-    //             FilterApiData.push(obj)
-    //         }
-    //     });
-    // });
 
     dataTemp.forEach((key) => {
         resulta[key] = [];
