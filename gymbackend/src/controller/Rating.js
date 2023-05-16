@@ -1,5 +1,4 @@
 const { default: axios } = require("axios");
-const Exersise = require("../model/Excercise");
 const Rating = require("../model/Rating");
 
 const ApiUrl = "https://musclewiki.p.rapidapi.com/exercises"
@@ -9,8 +8,6 @@ const options = {
         'X-RapidAPI-Host': 'musclewiki.p.rapidapi.com'
     }
 };
-
-
 
 const postRating = async (req, res) => {
     try {
@@ -23,143 +20,99 @@ const postRating = async (req, res) => {
             try {
                 const addRating = new Rating(req.body);
                 const newRating = await addRating.save();
-                res.status(200).json({ message: "new created", data: newRating });
+                res.status(200).json(newRating);
             } catch (error) {
                 res.status(400).json({ messgae: error })
             }
         }
     } catch (err) {
-        console.log("err === ", err)
-        res.status(400).json({ messgae: "Bad request" })
+        console.log("err------", err)
+        res.status(400).json({ message: "Bad request" })
     }
 }
 
 const addRating = async (req, res) => {
-    try {
-        // Initialize empty arrays
-        const dataOfRating = [];
-        const lengthZero = []
-        const moreLength = []
 
-        // Retrieve data from MongoDB and join with ratings collection
-        const Arr = await Exersise.aggregate([
-            {
-                $lookup: {
-                    from: 'ratings',
-                    localField: "id",
-                    foreignField: "excersizeId",
-                    as: "ratingList"
-                }
-            }
-        ]);
+    const allDataEx = [];
+    const uniqueExercises = {};
+    const updatedArray = [];
+    const data = req.body.Data
 
-        // Loop through the data and extract ratings information into aa array
-        Arr.map((item) => {
-            return (item.ratingList.map((i) => {
-                dataOfRating.push({ ratings: i.rating, exi: i.excersizeId })
-            }))
-        });
-
-        // Sort dataOfRating array in descending order based on ratings
-        dataOfRating.sort(function (a, b) {
-            return b.ratings - a.ratings
-        });
-
-        // Sort Arr array based on the index of each item's corresponding id in dataOfRating array
-        Arr.sort((a, b) => {
-            const aIndex = dataOfRating.findIndex(obj => obj.exi === a.id);
-            const bIndex = dataOfRating.findIndex(obj => obj.exi === b.id);
-            return aIndex - bIndex;
-        });
-
-        // Sort Arr array based on the length of ratingList array (ascending order)
-        Arr.sort(function (a, b) {
-            if (a.ratingList < b.ratingList) return -1;
-            if (a.ratingList > b.ratingList) return 1;
-            return 0;
-        });
-
-        // Split Arr array into two arrays based on the length of ratingList array
-        Arr.map((ite) => {
-            if (ite.ratingList.length == 0) {
-                lengthZero.push(ite)
-            } else {
-                moreLength.push(ite)
-            }
-        });
-
-        // merge array1 and array2
-        const mergeResult = [...moreLength, ...lengthZero];
-
-        // Send JSON response with newaa array
-        res.status(200).json({ "data": mergeResult })
-    } catch (err) {
-        console.log("errrr", err);
-        res.status(400).json({ "message": err })
-    }
-
-}
-const addTestRating = async (req, res) => {
-    const data = req.body.Data;
-
-    const exist = await Rating.find()
-
-    const filteredProducts = data
-        .map(product => {
-            const category = exist.find(category => category.excersizeId === product.id);
-            const rating = category ? category.rating : 0;
-            return { ...product, rating };
+    // get allexercise from api
+    axios.get(ApiUrl, options).then(async (res) => {
+        res.data.forEach((item) => {
+            allDataEx.push(item)
         })
-        .filter(product => product.rating !== null);
+    }).catch((err) => {
+        console.log('err', err)
+    })
 
-    const sortedProducts = filteredProducts.sort((a, b) => b.rating - a.rating);
-    const filteredData = sortedProducts.filter((item) => item.rating <= 2);
-
-    const response = await axios.get(ApiUrl, options);
-    let array = response.data
-
-    let dataTemp = []
-    filteredData.map((it) => {
-        dataTemp.push({ target: it.target, category: it.Category })
-        })
-    let resulta = {};
-    let FilterApiData = []  //Contain all filter data from APi
-
-
-    dataTemp.forEach((key) => {
-        resulta[key] = [];
-        array.forEach((obj) => {
-            if (obj.Category == key.category && key.target.Primary) {
-                if (typeof key.target.Primary === "string") {
-                    if (obj.target.Primary && obj.target.Primary.includes(key.target.Primary)) {
-                        FilterApiData.push(obj)
-                    }
-                } else if (Array.isArray(key.target.Primary)) {
-                    for (let i = 0; i < key.target.Primary.length; i++) {
-                        if (obj.target.Primary && obj.target.Primary.includes(key.target.Primary[i])) {
-                            FilterApiData.push(obj)
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-    });
-
-    FilterApiData.forEach(obj2 => {
-        const obj1 = filteredData.find(obj1 => obj1.Category === obj2.Category && obj2.id != obj1.id);
-        if (obj1) {
-            const index = filteredData.indexOf(obj1);
-            obj2.rating = obj1.rating;
-            obj2.stepsDes = obj1.stepsDes;
-            filteredData[index] = obj2;
+    // remove duplicate excersizeId and replace rating with latest rating
+    data.forEach(item => {
+        const { excersizeId, rating } = item;
+        if (uniqueExercises[excersizeId]) {
+            uniqueExercises[excersizeId].rating = rating;
+        } else {
+            uniqueExercises[excersizeId] = { excersizeId, rating };
         }
     });
-    const newFilter = sortedProducts.filter((item) => item.rating > 2)
 
-    newFilter.push(filteredData)
-    const flatArray = newFilter.flat()
-    res.send(flatArray)
+    for (const item in uniqueExercises) {
+        updatedArray.push(uniqueExercises[item]);
+    }
+
+    // seprate rating <= 2
+    const filteredData = updatedArray.filter((item) => item.rating <= 2);
+
+    // had to put setTimeout otherwise data is not coming
+    setTimeout(async () => {
+
+        // get perticular record: match id of allexercise to the exerciseId of all exercise
+        const myArrayFiltered = allDataEx.filter((el) => {
+            return filteredData.some((f) => {
+                return f.excersizeId == el.id
+            });
+        });
+
+        // get data that match category and Primary target value
+        myArrayFiltered.forEach(givenItem => {
+            const matchedItem = allDataEx.find(apiItem => {
+                if (apiItem.Category === givenItem.Category && apiItem.target.Primary.includes(givenItem.target.Primary[0]) && apiItem.id !== givenItem.id) {
+                    return true;
+                }
+                return false;
+            });
+
+            // replace old data of rating <= 2 with new record``
+            if (matchedItem) {
+                const index = myArrayFiltered.indexOf(givenItem);
+                myArrayFiltered[index] = matchedItem;
+            }
+        });
+
+        // from all data seprate rating more then2
+        const newFilter = updatedArray.filter((item) => item.rating > 2);
+        const myArrayFilteredwww = allDataEx.filter((el) => {
+            return newFilter.some((f) => {
+                return f.excersizeId == el.id;
+            });
+        })
+        myArrayFilteredwww.push(myArrayFiltered);
+        const flatArray = myArrayFilteredwww.flat();
+
+        // get data of rating collection
+        const rate = await Rating.find()
+
+        // if id match then add rating field from rating collection
+        const filteredProducts = flatArray
+            .map(product => {
+                const category = rate.find(category => category.excersizeId === product.id);
+                const rating = category ? category.rating : 0;
+                return { ...product, rating };
+            })
+            .filter(product => product.rating !== null);
+        res.send(filteredProducts)
+    }, 5000)
 }
 
-module.exports = { postRating, addRating, addTestRating }
+module.exports = { postRating, addRating }

@@ -50,81 +50,83 @@
         <div class="text-white" v-if="this.paramsData.name">
           Hi {{ this.paramsData.name }} your workout has been generated
         </div>
-        <div class="content p-2" v-for="data in ApiData" :key="data.id">
-          <div class="row">
-            <div class="col">
-              <div class="heading">
-                {{ data.exercise_name }}
-                <div class="d-flex justify-content-between">
-                  <div class="text-muted">{{ data.Category }}</div>
-                  <div class="d-flex starContiner">
-                    <star-rating
-                      v-if="!this.displayStars"
-                      @update:rating="setRating"
-                      @click="sendId(data.id)"
-                      :star-size="20"
-                    >
-                    </star-rating>
-                    <star-rating
-                      v-else
-                      @update:rating="setRating"
-                      @click="sendId(data.id)"
-                      :star-size="20"
-                      :rating="data.rating"
-                    >
-                    </star-rating>
+        <div v-if="!this.loading">
+          <div class="content p-2" v-for="data in ApiData" :key="data.id">
+            <div class="row">
+              <div class="col">
+                <div class="heading">
+                  {{ data.exercise_name }}
+                  <div class="d-flex justify-content-between">
+                    <div class="text-muted">{{ data.Category }}</div>
+                    <div class="d-flex starContiner">
+                      <star-rating
+                        v-if="!this.displayStars"
+                        @update:rating="setRating"
+                        @click="sendId(data.id)"
+                        :star-size="20"
+                      >
+                      </star-rating>
+                      <star-rating
+                        v-else
+                        @update:rating="setRating"
+                        @click="sendId(data.id)"
+                        :star-size="20"
+                        :rating="data.rating"
+                      >
+                      </star-rating>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 content-set d-flex" v-if="data.set">
+                  <div>Sets : {{ data.set }}</div>
+                  <div className="Reps">Reps : {{ data.reps }}</div>
+                </div>
+
+                <!-- video -->
+                <div
+                  @click="data.isOpen = !data.isOpen"
+                  className="mt-2 content-set d-flex"
+                >
+                  How To : <i v-if="!data.isOpen" class="bi bi-plus"></i>
+                  <i v-else class="bi bi-dash"></i>
+                </div>
+
+                <div
+                  @click="data.stepsOpen = !data.stepsOpen"
+                  className="mt-2 content-set d-flex"
+                >
+                  steps <i v-if="!data.stepsOpen" class="bi bi-plus"></i>
+                  <i v-else class="bi bi-dash"></i>
+                </div>
+              </div>
+
+              <!-- videos dropdown -->
+              <div v-if="data.isOpen">
+                <div class="card card-body">
+                  <div v-for="video in data.videoURL" :key="video">
+                    <video :src="video" autoplay className="videoFrame"></video>
                   </div>
                 </div>
               </div>
-              <div class="mt-4 content-set d-flex" v-if="data.set">
-                <div>Sets : {{data.set}}</div>
-                <div className="Reps" >Reps : {{data.reps}}</div>
-              </div>
 
-              <!-- video -->
-              <div
-                @click="data.isOpen = !data.isOpen"
-                className="mt-2 content-set d-flex"
-              >
-                How To : <i v-if="!data.isOpen" class="bi bi-plus"></i>
-                <i v-else class="bi bi-dash"></i>
-              </div>
-
-              <div
-                @click="data.stepsOpen = !data.stepsOpen"
-                className="mt-2 content-set d-flex"
-              >
-                steps <i v-if="!data.stepsOpen" class="bi bi-plus"></i>
-                <i v-else class="bi bi-dash"></i>
-              </div>
-            </div>
-
-            <!-- videos dropdown -->
-            <div v-if="data.isOpen">
-              <div class="card card-body">
-                <div v-for="video in data.videoURL" :key="video">
-                  <video :src="video" autoplay className="videoFrame"></video>
-                </div>
-              </div>
-            </div>
-
-            <!-- steps dropdown -->
-            <div v-if="data.stepsOpen">
-              <div class="card card-body">
-                <div
-                  v-for="(step, index) in data.stepsDes"
-                  :key="(index = index + 1)"
-                >
+              <!-- steps dropdown -->
+              <div v-if="data.stepsOpen">
+                <div class="card card-body">
                   <div
-                    className="bg-white rounded text-dark p-2 stepsDetails mb-1"
+                    v-for="(step, index) in data.steps"
+                    :key="(index = index + 1)"
                   >
-                    <div className="d-flex p-2">
-                      <span className="number text-light">
-                        {{ index }}
-                      </span>
-                      <span className="text-start">
-                        {{ step }}
-                      </span>
+                    <div
+                      className="bg-white rounded text-dark p-2 stepsDetails mb-1"
+                    >
+                      <div className="d-flex p-2">
+                        <span className="number text-light">
+                          {{ index }}
+                        </span>
+                        <span className="text-start">
+                          {{ step }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -132,8 +134,12 @@
             </div>
           </div>
         </div>
+        <div className="text-white loading" v-if="this.loading">
+          Loading...
+        </div>
         <div className="pt-2 pb-2">
           <button
+          v-if="!this.loading "
             @click="regenrate"
             :disabled="this.disableButton == true"
             v-bind:class="
@@ -166,7 +172,8 @@ export default {
       selectedWeek: "Week 1",
       noExercise: false,
       disableButton: false, //disable button after click,
-      // RatingChange: [],
+      RatingChange: [],
+      loading: false,
     };
   },
   methods: {
@@ -183,9 +190,8 @@ export default {
             id: data.id,
             Category: data.Category,
             exercise_name: data.exercise_name,
-            steps: data.steps.length,
             videoURL: [...data.videoURL],
-            stepsDes: [...data.steps],
+            steps: [...data.steps],
             target: data.target,
             SetsAndReps: [
               ["3", "10"],
@@ -203,6 +209,7 @@ export default {
     // fetch data as per day selected
     fetchDay(i) {
       this.disableButton = false;
+      this.RatingChange = [];
       this.activeIndex = i;
       if (this.paramsData.oftenTrain == "4x") {
         if (i === 1 || i === 2 || i === 4 || i === 5) {
@@ -309,7 +316,7 @@ export default {
             });
         }
       } else {
-        console.log("outside");
+        console.log("Days are not Selected---");
       }
     },
     // set rating data
@@ -320,9 +327,7 @@ export default {
           excersizeId: id,
         })
         .then((response) => {
-          // this.RatingChange.push(response.data);
-          console.log("response====", response);
-          // console.log("this.RatingChange", this.RatingChange);
+          this.RatingChange.push(response.data);
         })
         .catch((err) => {
           console.error(err);
@@ -335,12 +340,27 @@ export default {
     regenrate() {
       this.displayStars = true;
       this.disableButton = true;
+      this.loading = true;
       axios
-        .post("http://localhost:4000/api/addTestRating", { Data: this.ApiData })
+        .post("http://localhost:4000/api/addRating", {
+          Data: this.RatingChange,
+        })
         .then((res) => {
           const Data = res.data;
-          // Data.map((item) => console.log("item",item));
-          this.ApiData = Data;
+
+          const uniqueIds = new Set(
+            this.RatingChange.map((obj) => obj.excersizeId)
+          );
+
+          // Filter apidata to remove objects with duplicate ids
+          const filteredArray = this.ApiData.filter(
+            (obj) => !uniqueIds.has(obj.id)
+          );
+
+          // add new data from resposne
+          const nnn = [...Data, ...filteredArray];
+          this.ApiData = nnn;
+          this.loading = false;
         })
         .catch((err) => {
           console.error("err", err);
@@ -348,6 +368,7 @@ export default {
     },
   },
   async mounted() {
+    this.loading = true;
     // get all excercise initially
     const apiUrl = "http://localhost:4000/api/getexcercise";
     axios
@@ -361,15 +382,16 @@ export default {
             Category: data.Category,
             exercise_name: data.exercise_name,
             videoURL: [...data.videoURL],
-            stepsDes: [...data.steps],
-            target: data.target.Primary[0],
+            steps: [...data.steps],
+            target: data.target.Primary?.[0],
           });
           this.ApiData = apiData;
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    this.loading = false;
+    });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
   },
   computed: {
     // for check active index will match clicked id
@@ -466,7 +488,14 @@ h1 {
 .Disable {
   background-color: #6b645f;
 }
-.Reps{
+.Reps {
   padding-right: 5px;
+}
+.loading {
+  height: 507px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 31px;
 }
 </style>
